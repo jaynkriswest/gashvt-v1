@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import FleetIntelView from '@/components/FleetIntelView';
 import Scanner from '@/components/Scanner';
+import BulkProcessingView from '@/components/BulkProcessingView'; // This is key!
 
 export default function Dashboard() {
   const [mode, setMode] = useState('view');
@@ -17,19 +18,19 @@ export default function Dashboard() {
         
         <button 
           onClick={() => setMode('view')} 
-          className={`w-full text-left p-3 rounded-lg flex items-center gap-3 transition ${mode === 'view' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'hover:bg-slate-800 text-slate-400'}`}
+          className={`w-full text-left p-3 rounded-lg transition ${mode === 'view' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'text-slate-400'}`}
         >
           📊 Fleet Intel
         </button>
         <button 
           onClick={() => setMode('bulk')} 
-          className={`w-full text-left p-3 rounded-lg flex items-center gap-3 transition ${mode === 'bulk' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'hover:bg-slate-800 text-slate-400'}`}
+          className={`w-full text-left p-3 rounded-lg transition ${mode === 'bulk' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'text-slate-400'}`}
         >
           📂 Bulk Processing
         </button>
         <button 
           onClick={() => setMode('scan')} 
-          className={`w-full text-left p-3 rounded-lg flex items-center gap-3 transition ${mode === 'scan' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'hover:bg-slate-800 text-slate-400'}`}
+          className={`w-full text-left p-3 rounded-lg transition ${mode === 'scan' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'text-slate-400'}`}
         >
           📷 Barcode Scan
         </button>
@@ -37,21 +38,16 @@ export default function Dashboard() {
 
       {/* Dynamic Content Area */}
       <main className="flex-1 p-10 overflow-y-auto">
-        {/* Render View Mode */}
         {mode === 'view' && <FleetIntelView />}
 
-        {/* Render Scan Mode */}
+        {/* This replaces the "loading" text with your actual component */}
+        {mode === 'bulk' && <BulkProcessingView />}
+
         {mode === 'scan' && (
-          <div className="max-w-2xl mx-auto bg-slate-900 p-10 rounded-2xl border border-slate-800 text-center shadow-2xl">
-            <h2 className="text-xl font-bold mb-2">Point Camera at Barcode</h2>
-            <p className="text-slate-400 mb-8 text-sm">Ensure the barcode is well-lit and centered.</p>
+          <div className="max-w-2xl mx-auto bg-slate-900 p-10 rounded-2xl border border-slate-800 text-center">
+            <h2 className="text-xl font-bold mb-2 text-white">Point Camera at Barcode</h2>
             <Scanner onScan={(id) => alert(`Scanned: ${id}`)} />
           </div>
-        )}
-
-        {/* Render Bulk Mode (Placeholder for now) */}
-        {mode === 'bulk' && (
-          <div className="text-slate-500 italic">Bulk processing module loading...</div>
         )}
       </main>
     </div>
