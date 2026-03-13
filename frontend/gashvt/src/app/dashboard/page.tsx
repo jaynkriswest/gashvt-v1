@@ -1,55 +1,62 @@
 'use client'
 import { useState } from 'react';
 import FleetIntelView from '@/components/FleetIntelView';
-import Scanner from '@/components/Scanner';
-import BulkProcessingView from '@/components/BulkProcessingView'; // This is key!
+// import Scanner from '@/components/Scanner'; // Uncomment if file exists
+// import BulkProcessingView from '@/components/BulkProcessingView'; // Uncomment if file exists
 
 export default function Dashboard() {
   const [mode, setMode] = useState('view');
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-white font-sans">
-      {/* Sidebar Navigation */}
-      <nav className="w-64 border-r border-slate-800 p-6 space-y-4 bg-slate-950/50">
-        <div className="mb-10 px-2">
-          <h1 className="text-xl font-bold tracking-tight text-blue-500">KRISWEST</h1>
-          <p className="text-[10px] text-slate-500 uppercase tracking-widest">Logistics Pro</p>
-        </div>
-        
+    <div className="space-y-8">
+      {/* Sub-Navigation (Since the Main Menu is now at the top) */}
+      <div className="flex gap-2 bg-[#0d1117] p-1 rounded-xl border border-slate-800 w-fit">
         <button 
           onClick={() => setMode('view')} 
-          className={`w-full text-left p-3 rounded-lg transition ${mode === 'view' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'text-slate-400'}`}
+          className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+            mode === 'view' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'
+          }`}
         >
-          📊 Fleet Intel
+          📊 Intel
         </button>
         <button 
           onClick={() => setMode('bulk')} 
-          className={`w-full text-left p-3 rounded-lg transition ${mode === 'bulk' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'text-slate-400'}`}
+          className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+            mode === 'bulk' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'
+          }`}
         >
-          📂 Bulk Processing
+          📂 Bulk
         </button>
         <button 
           onClick={() => setMode('scan')} 
-          className={`w-full text-left p-3 rounded-lg transition ${mode === 'scan' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'text-slate-400'}`}
+          className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+            mode === 'scan' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'
+          }`}
         >
-          📷 Barcode Scan
+          📷 Scan
         </button>
-      </nav>
+      </div>
 
       {/* Dynamic Content Area */}
-      <main className="flex-1 p-10 overflow-y-auto">
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
         {mode === 'view' && <FleetIntelView />}
-
-        {/* This replaces the "loading" text with your actual component */}
-        {mode === 'bulk' && <BulkProcessingView />}
-
-        {mode === 'scan' && (
-          <div className="max-w-2xl mx-auto bg-slate-900 p-10 rounded-2xl border border-slate-800 text-center">
-            <h2 className="text-xl font-bold mb-2 text-white">Point Camera at Barcode</h2>
-            <Scanner onScan={(id) => alert(`Scanned: ${id}`)} />
+        
+        {/* Replace these once your components are ready */}
+        {mode === 'bulk' && (
+          <div className="p-20 text-center border-2 border-dashed border-slate-800 rounded-3xl text-slate-600 font-bold uppercase tracking-tighter">
+            Bulk Processing Module Ready
           </div>
         )}
-      </main>
+
+        {mode === 'scan' && (
+          <div className="max-w-2xl mx-auto bg-[#0d1117] p-10 rounded-2xl border border-slate-800 text-center">
+            <h2 className="text-xl font-bold mb-4 text-white uppercase tracking-tighter">Point Camera at Barcode</h2>
+            <div className="aspect-video bg-black rounded-xl border border-slate-800 flex items-center justify-center text-slate-700 italic">
+               Camera feed initializing...
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

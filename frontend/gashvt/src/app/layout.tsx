@@ -1,35 +1,16 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "KRISWEST Logistics",
-  description: "Professional Fleet Management System",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        // This stops Grammarly and other extensions from triggering hydration errors
-        suppressHydrationWarning={true}
-      >
-        {children}
+      <body className="bg-[#010409] text-white antialiased">
+        <div className="flex flex-col min-h-screen">
+          <Navbar /> {/* This puts the menu at the very top */}
+          <main className="flex-1 p-8">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
