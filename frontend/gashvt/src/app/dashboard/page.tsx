@@ -1,4 +1,4 @@
-''use client'
+'use client'
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import FleetIntelView from '@/components/FleetIntelView';
