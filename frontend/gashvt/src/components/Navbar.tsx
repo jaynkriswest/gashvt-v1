@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+// Import the Home icon from Lucide
+import { Home } from 'lucide-react';
 
 export default function Navbar() {
   const [session, setSession] = useState<any>(null);
@@ -31,10 +33,8 @@ export default function Navbar() {
     getSessionAndRole();
   }, [supabase]);
 
-  // Hide Navbar on login page or during initial session check
   if (pathname === '/login' || loading || !session) return null;
 
-  // Helper function to determine if a link is active
   const isActive = (path: string) => pathname === path;
 
   return (
@@ -45,18 +45,18 @@ export default function Navbar() {
         </Link>
       </div>
 
-      {/* Navigation Links - Mobile friendly with overflow scroll */}
       <div className="flex items-center gap-4 md:gap-8 overflow-x-auto no-scrollbar mx-4">
         <Link 
           href="/dashboard" 
-          className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-1.5 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap ${
             isActive('/dashboard') ? 'text-blue-500' : 'text-slate-400 hover:text-white'
           }`}
         >
-          Fleet Intel
+          {/* Home Icon added here */}
+          <Home size={14} strokeWidth={3} />
+          <span>Fleet Intel</span>
         </Link>
 
-        {/* ONLY SHOW THESE IF ROLE IS ADMIN */}
         {userRole === 'Admin' && (
           <>
             <Link 
