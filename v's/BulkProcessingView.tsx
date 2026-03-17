@@ -2,8 +2,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 
-// 1. Accept userProfile to ensure data is filtered by company on both devices
-export default function BulkProcessingView({ userProfile }: { userProfile: any }) {
+export default function BulkProcessingView() {
   const [data, setData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -11,16 +10,9 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
 
   async function loadAllRecords() {
     setLoading(true);
-    
-    // Start building the query
-    let query = supabase.from('cylinders').select('*');
-
-    // 2. SECURITY: If not an Admin, only show cylinders for their specific company
-    if (userProfile?.role !== 'Admin' && userProfile?.client_link) {
-      query = query.eq('Customer_Name', userProfile.client_link);
-    }
-
-    const { data, error } = await query
+    const { data, error } = await supabase
+      .from('cylinders')
+      .select('*')
       .order('last_updated', { ascending: false }) 
       .limit(100); 
 
@@ -30,7 +22,7 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
 
   useEffect(() => {
     loadAllRecords();
-  }, [userProfile]); // Reload if profile changes
+  }, []);
 
   const filteredRecords = data.filter((item) => 
     item.Cylinder_ID?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,10 +30,10 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
   );
 
   return (
-    <div className="p-2 md:p-4 space-y-4 max-w-6xl mx-auto">
-      {/* HEADER: Responsive layout for mobile (stacking) and laptop (row) */}
+    <div className="p-4 space-y-4 max-w-6xl mx-auto">
+      {/* 1. COMPACT HEADER */}
       <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-10 backdrop-blur-md">
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-3">
           <div className="h-8 w-1 bg-blue-500 rounded-full"></div>
           <div>
             <h2 className="text-white font-bold text-sm uppercase tracking-wider">Batch Operation Hub</h2>
@@ -49,7 +41,6 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
           </div>
         </div>
 
-        {/* Search Bar: Full width on mobile */}
         <div className="relative w-full md:w-80">
           <input 
             type="text"
@@ -61,15 +52,15 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
         </div>
       </div>
 
-      {/* TABLE CONTAINER: Added overflow-x-auto for horizontal swiping on mobile screens */}
+      {/* 2. FIXED HEIGHT SCROLLABLE CONTAINER */}
       <div className="bg-[#0d1117] border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-        <div className="max-h-[500px] overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-          <table className="w-full text-left border-collapse min-w-[600px] md:table-fixed">
+        <div className="max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+          <table className="w-full text-left border-collapse table-fixed">
             <thead className="bg-slate-900 text-slate-500 text-[9px] uppercase tracking-widest sticky top-0 z-20 shadow-sm">
               <tr>
-                <th className="px-6 py-3 md:w-1/3">Cylinder Identity</th>
-                <th className="px-6 py-3 md:w-1/4">Batch</th>
-                <th className="px-6 py-3 md:w-1/4">Status</th>
+                <th className="px-6 py-3 w-1/3">Cylinder Identity</th>
+                <th className="px-6 py-3 w-1/4">Batch</th>
+                <th className="px-6 py-3 w-1/4">Status</th>
                 <th className="px-6 py-3 text-right">Action</th>
               </tr>
             </thead>
@@ -108,7 +99,7 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
           </table>
         </div>
         
-        {/* FOOTER: Standardized across devices */}
+        {/* 3. FOOTER SUMMARY */}
         {!loading && (
           <div className="bg-slate-900/30 p-2 border-t border-slate-800 text-center">
             <p className="text-slate-600 text-[9px] uppercase font-bold tracking-tighter">

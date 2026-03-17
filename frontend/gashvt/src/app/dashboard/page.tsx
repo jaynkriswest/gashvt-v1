@@ -1,9 +1,10 @@
-'use client'
+''use client'
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import FleetIntelView from '@/components/FleetIntelView';
 import Scanner from '@/components/Scanner'; 
 import RecentActivityView from '@/components/RecentActivityView';
+import BulkProcessingView from '@/components/BulkProcessingView'; // Import the Bulk view
 
 export default function Dashboard() {
   const [mode, setMode] = useState('view');
@@ -27,32 +28,49 @@ export default function Dashboard() {
     loadDashboard();
   }, []);
 
+  // Standardized button style to replace activeStyle/inactiveStyle
+  const getBtnStyle = (btnMode: string) => `
+    px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all
+    ${mode === btnMode ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}
+  `;
+
   if (loading) return <div className="p-10 text-slate-500 font-mono text-[10px] uppercase">Authenticating...</div>;
 
   return (
     <div className="space-y-8">
       {/* Sub-Navigation */}
-      <div className="flex gap-2 bg-[#0d1117] p-1 rounded-xl border border-slate-800 w-fit">
-        <button onClick={() => setMode('view')} className={mode === 'view' ? 'activeStyle' : 'inactiveStyle'}>
+      <div className="flex flex-wrap gap-2 bg-[#0d1117] p-1 rounded-xl border border-slate-800 w-fit">
+        <button onClick={() => setMode('view')} className={getBtnStyle('view')}>
           📊 Intel
         </button>
         
-        <button onClick={() => setMode('recent')} className={mode === 'recent' ? 'activeStyle' : 'inactiveStyle'}>
+        <button onClick={() => setMode('recent')} className={getBtnStyle('recent')}>
           🕒 Recent
         </button>
 
-        {/* Only show Scan for Testing Centers or Admins */}
+        {/* 1. Add the Bulk button (visible to Admins) */}
+        {profile?.role === 'Admin' && (
+          <button onClick={() => setMode('bulk')} className={getBtnStyle('bulk')}>
+            📂 Bulk
+          </button>
+        )}
+
+        {/* Scan button for Testing Centers or Admins */}
         {(profile?.role === 'testing_center' || profile?.role === 'Admin') && (
-          <button onClick={() => setMode('scan')} className={mode === 'scan' ? 'activeStyle' : 'inactiveStyle'}>
+          <button onClick={() => setMode('scan')} className={getBtnStyle('scan')}>
             📷 Scan
           </button>
         )}
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
-        {/* Pass profile data so the views know how to filter charts */}
+        {/* Render Views based on mode */}
         {mode === 'view' && <FleetIntelView userProfile={profile} />}
         {mode === 'recent' && <RecentActivityView userProfile={profile} />}
+        
+        {/* 2. Add the Bulk View logic */}
+        {mode === 'bulk' && <BulkProcessingView userProfile={profile} />}
+
         {mode === 'scan' && (
           <div className="max-w-2xl mx-auto">
              <Scanner userProfile={profile} />
