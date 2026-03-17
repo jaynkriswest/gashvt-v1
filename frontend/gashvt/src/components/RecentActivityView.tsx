@@ -2,7 +2,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 
-export default function RecentActivityView() {
+// 1. Accept userProfile as a prop to fix the TypeScript 'IntrinsicAttributes' error
+export default function RecentActivityView({ userProfile }: { userProfile: any }) {
   const [recentData, setRecentData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -11,10 +12,19 @@ export default function RecentActivityView() {
   // Reusable fetch function that sorts by the new last_updated column
   const fetchRecent = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    
+    // Start building the query
+    let query = supabase
       .from('cylinders')
-      .select('*')
-      .order('last_updated', { ascending: false }) // This works now that you've run the SQL
+      .select('*');
+
+    // 2. SECURITY: Filter results by company if the user is not an Admin
+    if (userProfile?.role !== 'Admin' && userProfile?.client_link) {
+      query = query.eq('Customer_Name', userProfile.client_link);
+    }
+
+    const { data, error } = await query
+      .order('last_updated', { ascending: false }) 
       .limit(20);
     
     if (error) {
@@ -23,7 +33,7 @@ export default function RecentActivityView() {
       setRecentData(data || []);
     }
     setLoading(false);
-  }, [supabase]);
+  }, [supabase, userProfile]); // Added userProfile to dependency array
 
   // Initial fetch on mount
   useEffect(() => {
@@ -68,9 +78,9 @@ export default function RecentActivityView() {
         </div>
       </div>
 
-      {/* Table Section */}
+      {/* Table Section: Responsive with overflow-x-auto */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left border-collapse min-w-[600px]">
           <thead className="bg-slate-900/50 text-slate-500 text-[9px] uppercase tracking-widest">
             <tr>
               <th className="px-6 py-4 border-b border-slate-800">Identity</th>
