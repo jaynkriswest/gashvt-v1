@@ -1,23 +1,41 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-dark: #010409;
-  --color-brand-panel: #0d1117;
-  --color-brand-border: #30363d;
+  /* Dynamic mapping */
+  --color-brand-dark: var(--bg-main);
+  --color-brand-panel: var(--bg-panel);
+  --color-brand-border: var(--border-color);
+  --color-text-main: var(--text-main);
 }
 
 :root {
-  background-color: #010409;
-  color: white;
+  /* LIGHT MODE (Default) */
+  --bg-main: #ffffff;
+  --bg-panel: #f6f8fa;
+  --border-color: #d0d7de;
+  --text-main: #1f2328;
+  
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* This class is toggled by the Theme Switcher or System Settings */
+.dark {
+  /* YOUR CURRENT DARK COLORS */
+  --bg-main: #010409;
+  --bg-panel: #0d1117;
+  --border-color: #30363d;
+  --text-main: #ffffff;
 }
 
 body {
-  @apply bg-[#010409] text-white antialiased;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  @apply antialiased transition-colors duration-200;
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
-/* Force dark mode background if Tailwind classes fail temporarily */
 html {
-  background: #010409;
+  background: var(--bg-main);
 }
