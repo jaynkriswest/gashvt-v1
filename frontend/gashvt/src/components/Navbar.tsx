@@ -9,7 +9,7 @@ export default function Navbar() {
   const [session, setSession] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -32,15 +32,15 @@ export default function Navbar() {
     getSessionAndRole();
   }, [supabase]);
 
+  // Close menu automatically when user clicks a link
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
 
-  // Prevent Navbar from rendering on login page
   if (pathname === '/login') return null;
-
-  // Render a placeholder height during loading to prevent layout shift
+  // Placeholder to prevent "jumping" UI during load
   if (loading) return <div className="h-[73px] bg-[#0d1117] border-b border-slate-800" />;
+  if (!session) return null;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -50,13 +50,12 @@ export default function Navbar() {
   return (
     <nav className="bg-[#0d1117] border-b border-slate-800 sticky top-0 z-50">
       <div className="flex items-center justify-between px-4 md:px-8 py-4">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-blue-500 font-black text-lg md:text-xl tracking-tighter whitespace-nowrap">
-            GAS LOGISTICS
-          </Link>
-        </div>
+        {/* LOGO SECTION */}
+        <Link href="/dashboard" className="text-blue-500 font-black text-lg md:text-xl tracking-tighter whitespace-nowrap">
+          GAS LOGISTICS
+        </Link>
 
-        {/* Desktop View: Full Menu */}
+        {/* DESKTOP LINKS: Hidden on mobile */}
         <div className="hidden md:flex items-center gap-8">
           <NavLink href="/dashboard" label="Fleet Intel" icon={<Home size={14} />} active={pathname === '/dashboard'} />
           {userRole === 'Admin' && (
@@ -71,15 +70,15 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile View: Hamburger Button */}
-        <button className="md:hidden text-slate-400" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        {/* MOBILE MENU BUTTON: Only visible on mobile */}
+        <button className="md:hidden text-slate-400 p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* Mobile Dropdown */}
+      {/* MOBILE DROPDOWN MENU */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-slate-800 bg-[#0d1117] p-4 flex flex-col gap-2">
+        <div className="md:hidden border-t border-slate-800 bg-[#0d1117] p-4 flex flex-col gap-2 animate-in slide-in-from-top duration-200">
           <MobileNavLink href="/dashboard" label="Fleet Intel" icon={<Home size={18} />} active={pathname === '/dashboard'} />
           {userRole === 'Admin' && (
             <>
@@ -88,7 +87,11 @@ export default function Navbar() {
               <MobileNavLink href="/barcode-scan" label="Barcode Scan" icon={<ScanBarcode size={18} />} active={pathname === '/barcode-scan'} />
             </>
           )}
-          <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-4 text-red-500 font-black uppercase text-[11px]">
+          <div className="h-px bg-slate-800 my-2" />
+          <button 
+            onClick={handleSignOut}
+            className="flex items-center gap-4 px-4 py-4 text-red-500 font-black uppercase tracking-widest text-[11px]"
+          >
             <LogOut size={18} /> Sign Out
           </button>
         </div>
@@ -99,7 +102,7 @@ export default function Navbar() {
 
 function NavLink({ href, label, icon, active }: any) {
   return (
-    <Link href={href} className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${active ? 'text-blue-500' : 'text-slate-400 hover:text-white'}`}>
+    <Link href={href} className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest transition-all ${active ? 'text-blue-500' : 'text-slate-400 hover:text-white'}`}>
       {icon} <span>{label}</span>
     </Link>
   );
@@ -107,7 +110,12 @@ function NavLink({ href, label, icon, active }: any) {
 
 function MobileNavLink({ href, label, icon, active }: any) {
   return (
-    <Link href={href} className={`flex items-center gap-4 px-4 py-4 rounded-xl font-black uppercase text-[11px] ${active ? 'bg-blue-500/10 text-blue-500' : 'text-slate-400'}`}>
+    <Link 
+      href={href} 
+      className={`flex items-center gap-4 px-4 py-4 rounded-xl font-black uppercase text-[11px] transition-all ${
+        active ? 'bg-blue-500/10 text-blue-500' : 'text-slate-400 hover:bg-slate-800/50'
+      }`}
+    >
       {icon} <span>{label}</span>
     </Link>
   );
