@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, CheckSquare, Square, Loader2, Package, Search, Filter } from 'lucide-react';
+import { AlertTriangle, Package, Loader2, Search, Filter } from 'lucide-react';
 
 interface BulkProcessingViewProps {
   userProfile?: any;
@@ -10,7 +10,6 @@ interface BulkProcessingViewProps {
 
 export default function BulkProcessingView({ userProfile }: BulkProcessingViewProps) {
   const [cylinders, setCylinders] = useState<any[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   
   // 1. SEARCH & FILTER STATE
@@ -33,9 +32,8 @@ export default function BulkProcessingView({ userProfile }: BulkProcessingViewPr
     fetchCylinders();
   }, [supabase]);
 
-  // 2. FILTERING LOGIC
+  // 2. DYNAMIC FILTERING LOGIC
   const filteredBatches = useMemo(() => {
-    // First, filter the raw list
     const filteredList = cylinders.filter(u => {
       const matchesSearch = u.Cylinder_ID.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'ALL' || u.Status === statusFilter;
@@ -43,7 +41,6 @@ export default function BulkProcessingView({ userProfile }: BulkProcessingViewPr
       return matchesSearch && matchesStatus && matchesBatch;
     });
 
-    // Then, group them into batches for the UI
     return filteredList.reduce((acc: any, unit: any) => {
       const bId = unit.Batch_ID || 'UNASSIGNED';
       if (!acc[bId]) acc[bId] = [];
@@ -52,7 +49,6 @@ export default function BulkProcessingView({ userProfile }: BulkProcessingViewPr
     }, {});
   }, [cylinders, searchTerm, statusFilter, batchFilter]);
 
-  // Unique Batch IDs for the filter dropdown
   const uniqueBatches = useMemo(() => 
     Array.from(new Set(cylinders.map(u => u.Batch_ID).filter(Boolean))), 
   [cylinders]);
@@ -65,7 +61,6 @@ export default function BulkProcessingView({ userProfile }: BulkProcessingViewPr
 
     if (!error) {
       setCylinders(prev => prev.map(u => ids.includes(u.Cylinder_ID) ? { ...u, Status: newStatus } : u));
-      setSelectedIds([]);
       router.refresh();
     }
   };
@@ -75,54 +70,80 @@ export default function BulkProcessingView({ userProfile }: BulkProcessingViewPr
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
       
-      {/* 3. SEARCH & FILTER AREA */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+      {/* 3. SEARCH & FILTER CONTROLS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#0d1117] p-4 rounded-2xl border border-slate-800 shadow-xl">
         <div className="relative">
-          <Search className="absolute left-3 top-3 text-slate-500" size={16} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
           <input 
             type="text"
-            placeholder="Search Serial Number..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500"
+            placeholder="Search Cylinder ID..."
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-xs text-white outline-none focus:border-blue-500 transition-colors"
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <select 
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-slate-950 border border-slate-800 rounded-xl py-2 px-4 text-xs text-slate-400 outline-none"
-        >
-          <option value="ALL">All Statuses</option>
-          <option value="EMPTY">Empty</option>
-          <option value="FULL">Full</option>
-          <option value="DAMAGED">Damaged</option>
-        </select>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+            <select 
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-[10px] text-slate-400 font-bold uppercase outline-none appearance-none cursor-pointer"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="EMPTY">Empty</option>
+              <option value="FULL">Full</option>
+              <option value="DAMAGED">Damaged</option>
+            </select>
+          </div>
 
-        <select 
-          onChange={(e) => setBatchFilter(e.target.value)}
-          className="bg-slate-950 border border-slate-800 rounded-xl py-2 px-4 text-xs text-slate-400 outline-none"
-        >
-          <option value="ALL">All Batches</option>
-          {uniqueBatches.map(b => <option key={b} value={b}>{b}</option>)}
-        </select>
+          <select 
+            onChange={(e) => setBatchFilter(e.target.value)}
+            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl py-2 px-4 text-[10px] text-slate-400 font-bold uppercase outline-none cursor-pointer"
+          >
+            <option value="ALL">All Batches</option>
+            {uniqueBatches.map(b => <option key={b} value={b}>{b}</option>)}
+          </select>
+        </div>
       </div>
 
-      {/* RENDER BATCHES (Same logic as before, using filteredBatches) */}
+      {/* 4. RENDER GROUPED BATCHES */}
       {Object.entries(filteredBatches).map(([batchId, units]: [string, any]) => (
-        <div key={batchId} className="space-y-3">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-slate-500 font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
-              <Package size={14} /> Batch: {batchId} ({units.length} Units)
-            </h2>
+        <div key={batchId} className="bg-[#0d1117]/40 rounded-3xl border border-slate-800/50 overflow-hidden shadow-sm">
+          <div className="p-5 border-b border-slate-800/50 flex items-center justify-between bg-slate-900/20">
+            <div>
+              <h2 className="text-blue-500 font-black text-xs uppercase tracking-widest flex items-center gap-2">
+                <Package size={14} /> {batchId}
+              </h2>
+              <p className="text-[9px] text-slate-500 font-bold mt-1 uppercase">{units.length} Units Found</p>
+            </div>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => handleStatusUpdate(units.map((u:any) => u.Cylinder_ID), 'FULL')}
+                className="bg-blue-600/10 hover:bg-blue-600 text-blue-500 hover:text-white border border-blue-500/20 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all"
+              >
+                Mark All Full
+              </button>
+            </div>
           </div>
-          {/* ... existing unit mapping row logic ... */}
-          {units.map((unit: any) => (
-             <div key={unit.Cylinder_ID} className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
-                <span className="text-blue-400 font-mono text-xs">{unit.Cylinder_ID}</span>
-                <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${unit.Status === 'FULL' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-800 text-slate-400'}`}>
-                  {unit.Status}
-                </span>
-             </div>
-          ))}
+
+          <div className="divide-y divide-slate-800/30 max-h-96 overflow-y-auto custom-scrollbar">
+            {units.map((unit: any) => (
+              <div key={unit.Cylinder_ID} className="px-6 py-3 flex items-center justify-between hover:bg-slate-800/20 transition-colors">
+                <span className="text-slate-300 font-mono text-[11px] font-bold">{unit.Cylinder_ID}</span>
+                <div className="flex items-center gap-4">
+                  <span className={`text-[9px] font-black px-2 py-1 rounded border ${
+                    unit.Status === 'FULL' ? 'border-emerald-500/30 text-emerald-500 bg-emerald-500/5' : 
+                    unit.Status === 'DAMAGED' ? 'border-red-500/30 text-red-500 bg-red-500/5' : 'border-slate-700 text-slate-500'
+                  }`}>
+                    {unit.Status}
+                  </span>
+                  {unit.Status === 'DAMAGED' && (
+                    <span className="text-[8px] bg-red-600 text-white px-1.5 py-0.5 rounded font-black animate-pulse">FLAGGED</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>
