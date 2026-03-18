@@ -4,121 +4,120 @@ import { createClient } from '@/utils/supabase/client';
 
 export default function BulkProcessingView({ userProfile }: { userProfile: any }) {
   const [cylinders, setCylinders] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState(''); // Added search state
   const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [updatingBatch, setUpdatingBatch] = useState<string | null>(null);
 
   const supabase = createClient();
 
   useEffect(() => {
     async function fetchCylinders() {
-      // 1. Fetching specifically the columns from your Supabase schema
+      // Use 'owner_company' to align with RLS policy
       let query = supabase.from('cylinders').select('Cylinder_ID, batch_id, Status, owner_company');
       
-      // 2. Align with your RLS Policy which uses 'owner_company'
       if (userProfile?.role !== 'Admin' && userProfile?.client_link) {
         query = query.eq('owner_company', userProfile.client_link);
       }
 
-      const { data, error } = await query.order('Cylinder_ID', { ascending: true });
+      const { data } = await query.order('batch_id', { ascending: true });
       if (data) setCylinders(data);
-      if (error) console.error("Fetch error:", error.message);
       setLoading(false);
     }
     fetchCylinders();
   }, [userProfile, supabase]);
 
-  const handleStatusChange = (id: string, newStatus: string) => {
-    setCylinders(prev => prev.map(c => 
-      c.Cylinder_ID === id ? { ...c, Status: newStatus } : c
-    ));
-  };
+  // Grouping logic for conciseness
+  const batches = cylinders.reduce((acc: any, curr) => {
+    const batchId = curr.batch_id || 'UNBATCHED';
+    if (!acc[batchId]) acc[batchId] = [];
+    acc[batchId].push(curr);
+    return acc;
+  }, {});
 
-  const handleUpdate = async (id: string) => {
-    setUpdatingId(id);
-    const target = cylinders.find(c => c.Cylinder_ID === id);
-    
-    // 3. Update Status using exact case sensitivity
+  // Update EVERY cylinder in a specific batch
+  const handleBatchUpdate = async (batchId: string, newStatus: string) => {
+    setUpdatingBatch(batchId);
     const { error } = await supabase
       .from('cylinders')
-      .update({ Status: target.Status })
-      .eq('Cylinder_ID', id);
+      .update({ Status: newStatus })
+      .eq('batch_id', batchId);
 
-    if (error) {
-      console.error("Update Error:", error.message);
-      alert("Failed to update: Ensure you have an UPDATE policy in Supabase.");
-    } else {
-      console.log(`Cylinder ${id} successfully updated to ${target.Status}`);
+    if (!error) {
+      setCylinders(prev => prev.map(c => 
+        c.batch_id === batchId ? { ...c, Status: newStatus } : c
+      ));
     }
-    setUpdatingId(null);
+    setUpdatingBatch(null);
   };
 
-  // 4. Implement filtering logic for the search bar
-  const filteredCylinders = cylinders.filter(c => 
-    c.Cylinder_ID.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.batch_id?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Update just one cylinder (the outlier)
+  const handleSingleUpdate = async (id: string, newStatus: string) => {
+    const { error } = await supabase
+      .from('cylinders')
+      .update({ Status: newStatus })
+      .eq('Cylinder_ID', id);
+
+    if (!error) {
+      setCylinders(prev => prev.map(c => 
+        c.Cylinder_ID === id ? { ...c, Status: newStatus } : c
+      ));
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      {/* Search Input added to match your design */}
-      <div className="flex justify-end mb-4">
-        <input 
-          type="text" 
-          placeholder="Search Cylinder or Batch..." 
-          className="bg-[#0d1117] border border-slate-800 p-3 rounded-xl text-xs text-white w-full md:w-80 outline-none focus:border-blue-500"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+    <div className="space-y-8">
+      {Object.keys(batches).map(batchId => (
+        <div key={batchId} className="bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          {/* BATCH HEADER - CONCISE VIEW */}
+          <div className="bg-slate-900/80 p-4 flex justify-between items-center border-b border-slate-800">
+            <div>
+              <h3 className="text-blue-400 font-black text-xs uppercase tracking-widest">{batchId}</h3>
+              <p className="text-slate-500 text-[9px] font-mono">{batches[batchId].length} UNITS DETECTED</p>
+            </div>
+            
+            {/* MASS UPDATE OPTIONS */}
+            <div className="flex gap-2">
+              <span className="text-[9px] text-slate-500 font-bold self-center mr-2">BATCH ACTION:</span>
+              <button 
+                onClick={() => handleBatchUpdate(batchId, 'FULL')}
+                className="bg-blue-600/10 border border-blue-500/30 text-blue-500 text-[9px] px-3 py-1 rounded hover:bg-blue-600 hover:text-white transition-all"
+              >
+                MARK ALL FULL
+              </button>
+              <button 
+                onClick={() => handleBatchUpdate(batchId, 'EMPTY')}
+                className="bg-slate-800 border border-slate-700 text-slate-400 text-[9px] px-3 py-1 rounded hover:bg-slate-700 transition-all"
+              >
+                RESET TO EMPTY
+              </button>
+            </div>
+          </div>
 
-      <div className="bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-        <div className="grid grid-cols-4 bg-slate-900/50 p-4 border-b border-slate-800 text-[9px] font-black uppercase tracking-widest text-slate-500">
-          <div>Cylinder Identity</div>
-          <div>Batch</div>
-          <div>Status</div>
-          <div className="text-right">Action</div>
-        </div>
-
-        <div className="divide-y divide-slate-800">
-          {loading ? (
-            <div className="p-20 text-center text-slate-500 text-[10px] font-bold uppercase animate-pulse">Connecting to Supabase...</div>
-          ) : filteredCylinders.length === 0 ? (
-            <div className="p-20 text-center text-slate-500 text-[10px] font-bold uppercase">No records found</div>
-          ) : filteredCylinders.map((cylinder) => (
-            <div key={cylinder.Cylinder_ID} className="grid grid-cols-4 items-center p-4 hover:bg-slate-800/30 transition-colors">
-              <div className="text-blue-400 font-mono text-xs font-bold">{cylinder.Cylinder_ID}</div>
-              <div className="text-slate-500 font-mono text-[10px] uppercase">{cylinder.batch_id || '---'}</div>
-              
-              <div>
+          {/* INDIVIDUAL UNIT OVERRIDES (Scrollable list) */}
+          <div className="max-h-48 overflow-y-auto divide-y divide-slate-800/50">
+            {batches[batchId].map((unit: any) => (
+              <div key={unit.Cylinder_ID} className="grid grid-cols-3 p-3 items-center hover:bg-slate-800/20">
+                <span className="text-white font-mono text-[10px]">{unit.Cylinder_ID}</span>
+                
+                {/* Status Dropdown for outliers like DAMAGED */}
                 <select 
-                  value={cylinder.Status}
-                  onChange={(e) => handleStatusChange(cylinder.Cylinder_ID, e.target.value)}
-                  className="bg-[#161b22] border border-slate-700 text-[10px] font-black uppercase text-slate-300 rounded-lg px-2 py-1.5 outline-none focus:border-blue-500 cursor-pointer appearance-none text-center min-w-[100px]"
+                  value={unit.Status}
+                  onChange={(e) => handleSingleUpdate(unit.Cylinder_ID, e.target.value)}
+                  className="bg-transparent text-slate-400 text-[10px] uppercase font-bold outline-none cursor-pointer"
                 >
                   <option value="EMPTY">EMPTY</option>
                   <option value="FULL">FULL</option>
-                  <option value="IN-USE">IN-USE</option>
-                  {/* Matches 'Damaged' case in Supabase */}
-                  <option value="Damaged">DAMAGED</option> 
+                  <option value="Damaged">DAMAGED</option> {/* Case-sensitive to DB */}
                   <option value="TESTING">TESTING</option>
                 </select>
-              </div>
 
-              <div className="text-right">
-                <button 
-                  onClick={() => handleUpdate(cylinder.Cylinder_ID)}
-                  disabled={updatingId === cylinder.Cylinder_ID}
-                  className="text-[9px] font-black uppercase tracking-widest text-blue-500 border border-blue-500/30 px-4 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50"
-                >
-                  {updatingId === cylinder.Cylinder_ID ? 'Syncing...' : 'Update'}
-                </button>
+                <div className="text-right">
+                   {unit.Status === 'Damaged' && <span className="text-red-500 text-[8px] font-black border border-red-500/30 px-2 py-0.5 rounded">FLAGGED</span>}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      ))}
     </div>
   );
-}
 }
