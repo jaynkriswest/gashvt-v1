@@ -66,7 +66,7 @@ export default function IngestionPage({ userProfile }: { userProfile: any }) {
           {activeTab === 'scan' && (
             <div className="space-y-4">
               {/* Scanner wrapper remains black for camera contrast, but border follows theme */}
-              <div id="reader" className="bg-brand-dark rounded-xl overflow-hidden aspect-square border border-brand-border"></div>
+              <div id="reader" className="bg-black rounded-xl overflow-hidden aspect-square border border-brand-border"></div>
               <p className="text-[9px] text-center text-slate-500 font-bold uppercase">Scanner Active</p>
             </div>
           )}

@@ -57,7 +57,7 @@ export default function Scanner({ userProfile }: { userProfile: any }) {
         </div>
         
         {/* We keep the camera background black for contrast, but update the border */}
-        <div id="reader" className="overflow-hidden rounded-2xl border border-brand-border bg-black" />
+        <div id="reader" className="w-full rounded-2xl border border-brand-border bg-brand-dark overflow-hidden" />
         
         <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-6 text-center">
           Center the barcode inside the frame
