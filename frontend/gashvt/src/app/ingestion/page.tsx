@@ -23,7 +23,7 @@ export default function IngestionPage({ userProfile }: { userProfile: any }) {
         fps: 10, 
         qrbox: { width: 250, height: 150 },
         videoConstraints: { facingMode: { ideal: "environment" } }
-      }, false);
+      }, true);
 
       scanner.render((text) => {
         setFormData(prev => ({ ...prev, Cylinder_ID: text }));
