@@ -62,3 +62,20 @@ body {
   background-color: #3b82f6 !important;
   color: white !important;
 }
+
+/* Targets the 'Scan an Image File' link specifically */
+#reader__dashboard_section_csr a {
+  color: #3b82f6 !important; /* Forces it to a visible blue */
+  text-decoration: underline !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+}
+
+/* Targets 'Or drop an image to scan' and other status spans */
+#reader__dashboard_section_csr span,
+#reader__status_span,
+#reader label {
+  color: var(--text-main) !important; /* Uses your theme's dark text color */
+  opacity: 1 !important;
+  font-weight: 600 !important;
+}
