@@ -52,7 +52,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-brand-dark flex flex-col items-center justify-center p-6 transition-colors duration-200">
       {/* Floating Theme Toggle */}
       <div className="absolute top-6 right-6">
-        <ModeToggle />
+        <ThemeToggle />
       </div>
 
       <div className="w-full max-w-md bg-brand-panel border border-brand-border rounded-3xl p-8 shadow-2xl">
