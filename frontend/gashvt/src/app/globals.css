@@ -1,14 +1,16 @@
 @import "tailwindcss";
 
-/* 1. DEFINE RAW VARIABLES FIRST */
+/* 1. DEFINE VARIABLES FIRST */
 :root {
-  --brand-dark: #ffffff;      /* Pure white background */
-  --brand-panel: #f8fafc;     /* Light gray for cards/tables */
-  --brand-border: #e2e8f0;    /* Subtle light border */
-  --text-main: #0f172a;       /* Dark slate text */
+  --brand-dark: #ffffff;      /* Page background */
+  --brand-panel: #f8fafc;     /* Card/Table background */
+  --brand-border: #e2e8f0;    /* Subtle border */
+  --text-main: #0f172a;       /* Dark text */
+  
+  background-color: var(--brand-dark);
+  color: var(--text-main);
 }
 
-/* Ensure the .dark class is explicitly defined for the toggle */
 .dark {
   --brand-dark: #010409;
   --brand-panel: #0d1117;
@@ -31,31 +33,24 @@ body {
   @apply antialiased transition-colors duration-200;
 }
 
-/* 4. SCANNER LIBRARY OVERRIDES (CRITICAL FIXES) */
+/* 4. SCANNER & TABLE OVERRIDES (CRITICAL FOR LIGHT MODE) */
 
-/* Targets the 'Or drop an image to scan' text and labels */
+/* Fixes "Scan an Image File" and "Or drop an image" */
 #reader label, 
 #reader span, 
-#reader div {
-  color: var(--text-main) !important;
-}
-
-/* Specifically targets the drag-and-drop text inside the scanner */
+#reader a,
 #reader__dashboard_section_csr span {
   color: var(--text-main) !important;
-  font-weight: 600 !important;
   opacity: 1 !important;
 }
 
-/* Fixes the 'Request Camera Permissions' and 'Stop Scanning' buttons */
+/* Fixes Scanner Buttons */
 #reader button {
   background-color: var(--brand-panel) !important;
   color: var(--text-main) !important;
   border: 1px solid var(--brand-border) !important;
   padding: 10px 20px !important;
   border-radius: 12px !important;
-  text-transform: uppercase !important;
-  font-size: 11px !important;
   font-weight: 800 !important;
   cursor: pointer !important;
 }
@@ -63,4 +58,9 @@ body {
 #reader button:hover {
   background-color: #3b82f6 !important;
   color: white !important;
+}
+
+/* Force Table backgrounds if inheritance fails */
+.bg-brand-panel {
+  background-color: var(--brand-panel) !important;
 }

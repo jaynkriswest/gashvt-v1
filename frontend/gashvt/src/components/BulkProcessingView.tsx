@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Package, Loader2, Search, Filter } from 'lucide-react';
+import { Package, Loader2, Search } from 'lucide-react';
 
 export default function BulkProcessingView({ userProfile }: { userProfile?: any }) {
   const [cylinders, setCylinders] = useState<any[]>([]);
@@ -52,9 +52,9 @@ export default function BulkProcessingView({ userProfile }: { userProfile?: any 
   if (loading) return <div className="flex h-64 items-center justify-center"><Loader2 className="animate-spin text-blue-500" /></div>;
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Search Bar - Fixed hardcoded bg-slate-950 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-brand-panel p-4 rounded-2xl border border-brand-border shadow-xl transition-colors">
+    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto transition-colors">
+      {/* Filters Area */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-brand-panel p-4 rounded-2xl border border-brand-border shadow-xl">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
           <input 
@@ -68,7 +68,7 @@ export default function BulkProcessingView({ userProfile }: { userProfile?: any 
         <div className="flex gap-2">
           <select 
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="flex-1 bg-brand-dark border border-brand-border rounded-xl py-2 px-4 text-[10px] text-slate-500 font-bold uppercase outline-none cursor-pointer transition-colors"
+            className="flex-1 bg-brand-dark border border-brand-border rounded-xl py-2 px-4 text-[10px] text-slate-500 font-bold uppercase outline-none cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value="EMPTY">Empty</option>
@@ -78,7 +78,7 @@ export default function BulkProcessingView({ userProfile }: { userProfile?: any 
 
           <select 
             onChange={(e) => setBatchFilter(e.target.value)}
-            className="flex-1 bg-brand-dark border border-brand-border rounded-xl py-2 px-4 text-[10px] text-slate-500 font-bold uppercase outline-none cursor-pointer transition-colors"
+            className="flex-1 bg-brand-dark border border-brand-border rounded-xl py-2 px-4 text-[10px] text-slate-500 font-bold uppercase outline-none cursor-pointer"
           >
             <option value="ALL">All Batches</option>
             {uniqueBatches.map(b => <option key={b} value={b}>{b}</option>)}
@@ -86,10 +86,10 @@ export default function BulkProcessingView({ userProfile }: { userProfile?: any 
         </div>
       </div>
 
-      {/* Batch Cards - Fixed hardcoded bg-[#0d1117]/40 */}
+      {/* Batch Tables */}
       {Object.entries(filteredBatches).map(([batchId, units]: [string, any]) => (
-        <div key={batchId} className="bg-brand-panel rounded-3xl border border-brand-border overflow-hidden shadow-sm transition-colors">
-          <div className="p-5 border-b border-brand-border flex items-center justify-between bg-brand-panel transition-colors">
+        <div key={batchId} className="bg-brand-panel rounded-3xl border border-brand-border overflow-hidden shadow-sm mb-6 transition-colors">
+          <div className="p-5 border-b border-brand-border flex items-center justify-between bg-brand-panel">
             <div>
               <h2 className="text-blue-500 font-black text-xs uppercase tracking-widest flex items-center gap-2">
                 <Package size={14} /> {batchId}
@@ -104,17 +104,15 @@ export default function BulkProcessingView({ userProfile }: { userProfile?: any 
             </button>
           </div>
 
-          <div className="divide-y divide-brand-border max-h-96 overflow-y-auto custom-scrollbar transition-colors">
+          <div className="divide-y divide-brand-border max-h-96 overflow-y-auto transition-colors">
             {units.map((unit: any) => (
               <div key={unit.Cylinder_ID} className="px-6 py-3 flex items-center justify-between hover:bg-blue-500/5 transition-colors">
                 <span className="text-text-main font-mono text-[11px] font-bold">{unit.Cylinder_ID}</span>
-                <div className="flex items-center gap-4">
-                  <span className={`text-[9px] font-black px-2 py-1 rounded border ${
-                    unit.Status === 'FULL' ? 'border-emerald-500/30 text-emerald-500' : 'border-brand-border text-slate-500'
-                  }`}>
-                    {unit.Status}
-                  </span>
-                </div>
+                <span className={`text-[9px] font-black px-2 py-1 rounded border ${
+                  unit.Status === 'FULL' ? 'border-emerald-500/30 text-emerald-500' : 'border-brand-border text-slate-500'
+                }`}>
+                  {unit.Status}
+                </span>
               </div>
             ))}
           </div>
