@@ -28,17 +28,18 @@
 
 /* 3. BASE STYLES */
 body {
-  background-color: var(--brand-dark);
-  color: var(--text-main);
+  background-color: var(--brand-dark) !important;
+  color: var(--text-main) !important;
   @apply antialiased transition-colors duration-200;
 }
 
-/* 4. SCANNER & TABLE OVERRIDES (CRITICAL FOR LIGHT MODE) */
+/* 4. SCANNER & TABLE OVERRIDES */
 
-/* Fixes "Scan an Image File" and "Or drop an image" */
+/* Fixes "Or drop an image to scan" and all internal library text */
 #reader label, 
 #reader span, 
 #reader a,
+#reader div,
 #reader__dashboard_section_csr span {
   color: var(--text-main) !important;
   opacity: 1 !important;
@@ -60,7 +61,7 @@ body {
   color: white !important;
 }
 
-/* Force Table backgrounds if inheritance fails */
+/* FORCE Tables to be light in light mode */
 .bg-brand-panel {
   background-color: var(--brand-panel) !important;
 }
