@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* 1. DEFINE RAW VARIABLES FIRST */
+:root {
+  --brand-dark: #ffffff;      /* Pure white */
+  --brand-panel: #f8fafc;     /* Very light gray */
+  --brand-border: #e2e8f0;    /* Soft border */
+  --text-main: #0f172a;       /* Dark slate text */
+}
+
+.dark {
+  --brand-dark: #010409;
+  --brand-panel: #0d1117;
+  --brand-border: #30363d;
+  --text-main: #ffffff;
+}
+
+/* 2. MAP TO TAILWIND THEME SECOND */
+@theme {
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-panel: var(--brand-panel);
+  --color-brand-border: var(--brand-border);
+  --color-text-main: var(--text-main);
+}
+
+/* 3. BASE STYLES */
+body {
+  background-color: var(--brand-dark);
+  color: var(--text-main);
+  @apply antialiased transition-colors duration-200;
+}
+
+/* 4. SCANNER LIBRARY OVERRIDES (MUST BE AT THE VERY END) */
+#reader button {
+  background-color: var(--brand-panel) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--brand-border) !important;
+  /* ... rest of your button styles ... */
+}
+
+#reader label, #reader span, #reader a {
+  color: var(--text-main) !important;
+  opacity: 1 !important;
+}
