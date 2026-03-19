@@ -11,10 +11,10 @@ git push
 
 ------------------------------------------------------------------------
 git add .
-git commit -m "Updated BulkProcessingView 4"
+git commit -m "Updated BulkProcessingView 7"
 git push origin main
 
-
+git add -A
 -------------------------------------------------------------------------
 git pull origin main
 git add .
