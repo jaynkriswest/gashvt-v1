@@ -1,17 +1,11 @@
 @import "tailwindcss";
 
-@theme {
-  --color-brand-dark: var(--brand-dark);
-  --color-brand-panel: var(--brand-panel);
-  --color-brand-border: var(--brand-border);
-  --color-text-main: var(--text-main);
-}
-
+/* 1. DEFINE RAW VARIABLES FIRST */
 :root {
-  --brand-dark: #ffffff;
-  --brand-panel: #f6f8fa;
-  --brand-border: #d0d7de;
-  --text-main: #1f2328;
+  --brand-dark: #ffffff;      /* Page background */
+  --brand-panel: #f6f8fa;     /* Card/Table background */
+  --brand-border: #d0d7de;    /* Borders */
+  --text-main: #1f2328;       /* Primary text color */
   
   background-color: var(--brand-dark);
   color: var(--text-main);
@@ -24,15 +18,24 @@
   --text-main: #ffffff;
 }
 
+/* 2. MAP TO TAILWIND THEME SECOND (Explicit Mapping) */
+@theme {
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-panel: var(--brand-panel);
+  --color-brand-border: var(--brand-border);
+  --color-text-main: var(--text-main);
+}
+
+/* 3. BASE STYLES */
 body {
   background-color: var(--brand-dark);
   color: var(--text-main);
   @apply antialiased transition-colors duration-200;
 }
 
-/* --- ADD THESE AT THE VERY END --- */
+/* 4. SCANNER LIBRARY OVERRIDES (MUST BE AT THE VERY END) */
 
-/* 1. Fixes the "Request Camera Permissions" button visibility */
+/* Fixes buttons (Request Camera Permissions) */
 #reader button {
   background-color: var(--brand-panel) !important;
   color: var(--text-main) !important;
@@ -49,47 +52,37 @@ body {
 }
 
 #reader button:hover {
-  background-color: #3b82f6 !important; /* Blue hover state */
+  background-color: #3b82f6 !important;
   color: white !important;
   border-color: #3b82f6 !important;
   transform: translateY(-1px) !important;
 }
 
-/* 2. Fixes the "Scan an Image File" link visibility */
-#reader a {
+/* Fixes "Scan an Image File" link and label */
+#reader a, #reader label {
   color: #3b82f6 !important;
   font-size: 11px !important;
   text-decoration: none !important;
   font-weight: 700 !important;
   display: inline-block !important;
   margin-top: 12px !important;
-  opacity: 0.8 !important;
+  cursor: pointer !important;
 }
 
-#reader a:hover {
+#reader a:hover, #reader label:hover {
   text-decoration: underline !important;
-  opacity: 1 !important;
 }
 
-/* 3. Fixes the status text inside the scanner */
-#reader__status_span {
+/* Fixes internal library spans and status text */
+#reader span, #reader__status_span {
   color: var(--text-main) !important;
+  opacity: 0.8 !important;
   font-size: 10px !important;
   font-weight: bold !important;
 }
 
-/* Target the hidden library text labels */
-#reader label {
-  color: #3b82f6 !important; /* Force it to Blue */
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  cursor: pointer !important;
-  display: block !important;
-  margin-top: 5px !important;
-}
-
-/* Specific fix for the 'Scan an image file' text */
-#reader span {
+/* Specific fix for the scanner dashboard container to prevent dark backgrounds leaking */
+#reader__dashboard_section_csr {
+  background-color: transparent !important;
   color: var(--text-main) !important;
-  opacity: 0.7 !important;
 }

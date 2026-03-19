@@ -2,9 +2,9 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    "./src/**/*.{js,ts,jsx,tsx,mdx}", 
-    "./app/**/*.{js,ts,jsx,tsx,mdx}", 
-    "./components/**/*.{js,ts,jsx,tsx,mdx}", // Crucial for BulkProcessingView and Scanner
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}", // Add this!
+    "./src/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   darkMode: 'class', // Add this to enable the .dark class toggle
   theme: {

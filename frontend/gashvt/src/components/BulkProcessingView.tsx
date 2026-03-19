@@ -106,7 +106,7 @@ export default function BulkProcessingView({ userProfile }: { userProfile?: any 
 
           <div className="divide-y divide-brand-border max-h-96 overflow-y-auto custom-scrollbar transition-colors">
             {units.map((unit: any) => (
-              <div key={unit.Cylinder_ID} className="px-6 py-3 flex items-center justify-between hover:bg-brand-dark/10 transition-colors">
+              <div key={unit.Cylinder_ID} className="px-6 py-3 flex items-center justify-between hover:bg-blue-500/5 transition-colors">
                 <span className="text-text-main font-mono text-[11px] font-bold">{unit.Cylinder_ID}</span>
                 <div className="flex items-center gap-4">
                   <span className={`text-[9px] font-black px-2 py-1 rounded border ${
