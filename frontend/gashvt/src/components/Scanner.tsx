@@ -17,7 +17,8 @@ export default function Scanner({ userProfile }: { userProfile: any }) {
         fps: 10, 
         qrbox: { width: 250, height: 250 },
         aspectRatio: 1.0,
-        videoConstraints: { facingMode: { ideal: "environment" } }
+        videoConstraints: { facingMode: { ideal: "environment" },
+                            deviceId: undefined}
       },
       false
     );
