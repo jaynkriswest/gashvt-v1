@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ModeToggle } from "@/components/mode-toggle";
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');

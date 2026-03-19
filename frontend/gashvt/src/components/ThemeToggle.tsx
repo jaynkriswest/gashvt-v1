@@ -4,8 +4,7 @@ import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
-// Change 'export default function ThemeToggle' to 'export function ModeToggle'
-export function ModeToggle() {
+export function ThemeToggle() { // Removed 'default'
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
 
@@ -13,7 +12,7 @@ export function ModeToggle() {
     setMounted(true)
   }, [])
 
-  if (!mounted) return <div className="w-9 h-9" />
+  if (!mounted) return <div className="w-9 h-9" /> 
 
   return (
     <button

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Home, Database, Layers, ScanBarcode, LogOut, Menu, X } from 'lucide-react';
 // 1. IMPORT THE NEW TOGGLE
-import ThemeToggle from './ThemeToggle';
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 export default function Navbar() {
   const [session, setSession] = useState<any>(null);

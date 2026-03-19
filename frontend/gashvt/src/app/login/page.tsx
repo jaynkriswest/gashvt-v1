@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
-import { ModeToggle } from "@/components/mode-toggle"
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('')
