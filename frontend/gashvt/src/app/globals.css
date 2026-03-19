@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* This maps the CSS variables to Tailwind classes like bg-brand-panel */
+  /* This connects your CSS variables to the Tailwind classes you used in your code */
   --color-brand-dark: var(--brand-dark);
   --color-brand-panel: var(--brand-panel);
   --color-brand-border: var(--brand-border);
@@ -9,18 +9,18 @@
 }
 
 :root {
-  /* LIGHT MODE (Default) - Standard GitHub/Vercel Light Palette */
-  --brand-dark: #ffffff;      /* Page Background */
-  --brand-panel: #f6f8fa;     /* Card/Table Background */
-  --brand-border: #d0d7de;    /* Borders */
-  --text-main: #1f2328;       /* Primary Text */
+  /* LIGHT MODE (When .dark is NOT present) */
+  --brand-dark: #ffffff;      /* Pure white page background */
+  --brand-panel: #f6f8fa;     /* Light gray card/table background */
+  --brand-border: #d0d7de;    /* Subtle light border */
+  --text-main: #1f2328;       /* Dark text for visibility */
   
   background-color: var(--brand-dark);
   color: var(--text-main);
 }
 
 .dark {
-  /* DARK MODE - Your current preferred dark colors */
+  /* DARK MODE (Your current dark colors) */
   --brand-dark: #010409;
   --brand-panel: #0d1117;
   --brand-border: #30363d;

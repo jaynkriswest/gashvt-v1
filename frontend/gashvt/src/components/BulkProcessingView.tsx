@@ -89,7 +89,7 @@ export default function BulkProcessingView({ userProfile }: { userProfile?: any 
       {/* Batch Cards - Fixed hardcoded bg-[#0d1117]/40 */}
       {Object.entries(filteredBatches).map(([batchId, units]: [string, any]) => (
         <div key={batchId} className="bg-brand-panel rounded-3xl border border-brand-border overflow-hidden shadow-sm transition-colors">
-          <div className="p-5 border-b border-brand-border flex items-center justify-between bg-brand-panel/50 backdrop-blur-sm transition-colors">
+          <div className="p-5 border-b border-brand-border flex items-center justify-between bg-brand-panel transition-colors">
             <div>
               <h2 className="text-blue-500 font-black text-xs uppercase tracking-widest flex items-center gap-2">
                 <Package size={14} /> {batchId}
