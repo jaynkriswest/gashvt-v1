@@ -11,7 +11,6 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
 
   useEffect(() => {
     async function fetchCylinders() {
-      // Use 'owner_company' to align with RLS policy
       let query = supabase.from('cylinders').select('Cylinder_ID, batch_id, Status, owner_company');
       
       if (userProfile?.role !== 'Admin' && userProfile?.client_link) {
@@ -25,15 +24,13 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
     fetchCylinders();
   }, [userProfile, supabase]);
 
-  // Grouping logic for conciseness
   const batches = cylinders.reduce((acc: any, curr) => {
     const batchId = curr.batch_id || 'UNBATCHED';
-    if (!acc[batchId]) acc[batchId] = [];
+    if (!acc[batchId]) acc[acc[batchId] = [];
     acc[batchId].push(curr);
     return acc;
   }, {});
 
-  // Update EVERY cylinder in a specific batch
   const handleBatchUpdate = async (batchId: string, newStatus: string) => {
     setUpdatingBatch(batchId);
     const { error } = await supabase
@@ -49,7 +46,6 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
     setUpdatingBatch(null);
   };
 
-  // Update just one cylinder (the outlier)
   const handleSingleUpdate = async (id: string, newStatus: string) => {
     const { error } = await supabase
       .from('cylinders')
@@ -66,15 +62,16 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
   return (
     <div className="space-y-8">
       {Object.keys(batches).map(batchId => (
-        <div key={batchId} className="bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          {/* BATCH HEADER - CONCISE VIEW */}
-          <div className="bg-slate-900/80 p-4 flex justify-between items-center border-b border-slate-800">
+        /* FIXED: Use brand-panel and brand-border for theme support */
+        <div key={batchId} className="bg-brand-panel border border-brand-border rounded-2xl overflow-hidden shadow-xl transition-colors">
+          
+          {/* BATCH HEADER - FIXED: Dynamic colors and transparency removal */}
+          <div className="bg-brand-panel p-4 flex justify-between items-center border-b border-brand-border">
             <div>
-              <h3 className="text-blue-400 font-black text-xs uppercase tracking-widest">{batchId}</h3>
+              <h3 className="text-blue-500 font-black text-xs uppercase tracking-widest">{batchId}</h3>
               <p className="text-slate-500 text-[9px] font-mono">{batches[batchId].length} UNITS DETECTED</p>
             </div>
             
-            {/* MASS UPDATE OPTIONS */}
             <div className="flex gap-2">
               <span className="text-[9px] text-slate-500 font-bold self-center mr-2">BATCH ACTION:</span>
               <button 
@@ -85,28 +82,30 @@ export default function BulkProcessingView({ userProfile }: { userProfile: any }
               </button>
               <button 
                 onClick={() => handleBatchUpdate(batchId, 'EMPTY')}
-                className="bg-slate-800 border border-slate-700 text-slate-400 text-[9px] px-3 py-1 rounded hover:bg-slate-700 transition-all"
+                /* FIXED: Removed slate-800 for brand colors */
+                className="bg-brand-dark border border-brand-border text-slate-500 text-[9px] px-3 py-1 rounded hover:bg-brand-border transition-all"
               >
                 RESET TO EMPTY
               </button>
             </div>
           </div>
 
-          {/* INDIVIDUAL UNIT OVERRIDES (Scrollable list) */}
-          <div className="max-h-48 overflow-y-auto divide-y divide-slate-800/50">
+          {/* INDIVIDUAL UNIT LIST - FIXED: Scrollbar and text colors */}
+          <div className="max-h-48 overflow-y-auto divide-y divide-brand-border">
             {batches[batchId].map((unit: any) => (
-              <div key={unit.Cylinder_ID} className="grid grid-cols-3 p-3 items-center hover:bg-slate-800/20">
-                <span className="text-white font-mono text-[10px]">{unit.Cylinder_ID}</span>
+              /* FIXED: Removed text-white and hover:bg-slate-800 */
+              <div key={unit.Cylinder_ID} className="grid grid-cols-3 p-3 items-center hover:bg-blue-500/5 transition-colors">
+                <span className="text-text-main font-mono text-[10px] font-bold">{unit.Cylinder_ID}</span>
                 
-                {/* Status Dropdown for outliers like DAMAGED */}
                 <select 
                   value={unit.Status}
                   onChange={(e) => handleSingleUpdate(unit.Cylinder_ID, e.target.value)}
-                  className="bg-transparent text-slate-400 text-[10px] uppercase font-bold outline-none cursor-pointer"
+                  /* FIXED: Changed text-slate-400 to text-slate-500 */
+                  className="bg-transparent text-slate-500 text-[10px] uppercase font-bold outline-none cursor-pointer"
                 >
                   <option value="EMPTY">EMPTY</option>
                   <option value="FULL">FULL</option>
-                  <option value="Damaged">DAMAGED</option> {/* Case-sensitive to DB */}
+                  <option value="Damaged">DAMAGED</option>
                   <option value="TESTING">TESTING</option>
                 </select>
 
