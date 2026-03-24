@@ -19,6 +19,8 @@ export default function LoginPage() {
     setLoading(true)
     
     let targetEmail = identifier
+
+    // If identifier is a username instead of an email, look up the email
     if (!identifier.includes('@')) {
       const { data: profile, error: pError } = await supabase
         .from('profiles')
@@ -34,17 +36,24 @@ export default function LoginPage() {
       targetEmail = profile.email
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ 
-      email: targetEmail, 
-      password 
-    })
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: targetEmail, 
+        password 
+      })
 
-    if (error) {
-      alert(error.message)
+      if (error) {
+        alert(error.message)
+        setLoading(false)
+      } else if (data?.user) {
+        // SUCCESS: Use window.location.href for a hard redirect.
+        // This ensures cookies/sessions are fully synced with the server 
+        // before the dashboard attempts to load.
+        window.location.href = '/'
+      }
+    } catch (err) {
+      console.error("Authentication error:", err)
       setLoading(false)
-    } else {
-      router.push('/')
-      router.refresh()
     }
   }
 
@@ -60,28 +69,36 @@ export default function LoginPage() {
           <div className="bg-blue-600 p-3 rounded-2xl mb-4 shadow-lg shadow-blue-500/20">
             <ShieldCheck className="text-white" size={32} />
           </div>
-          <h1 className="text-2xl font-black tracking-tighter text-text-main uppercase">GASHVT V1</h1>
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Industrial Asset Management</p>
+          <h1 className="text-2xl font-black tracking-tighter text-text-main uppercase italic">
+            GASHVT V1
+          </h1>
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">
+            Industrial Asset Management
+          </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-slate-500 text-[10px] font-bold uppercase ml-1">Username or Email</label>
+            <label className="text-slate-500 text-[10px] font-bold uppercase ml-1">
+              Username or Email
+            </label>
             <input 
               type="text" 
               placeholder="Enter credentials" 
-              className="w-full p-3 bg-brand-dark border border-brand-border rounded-xl text-sm text-text-main focus:border-blue-500 outline-none transition-all"
+              className="w-full p-3 bg-brand-dark border border-brand-border rounded-xl text-sm text-text-main focus:border-blue-500 outline-none transition-all placeholder:text-slate-600"
               onChange={(e) => setIdentifier(e.target.value)} 
               required 
             />
           </div>
 
           <div className="space-y-1 relative">
-            <label className="text-slate-500 text-[10px] font-bold uppercase ml-1">Secure Key</label>
+            <label className="text-slate-500 text-[10px] font-bold uppercase ml-1">
+              Secure Key
+            </label>
             <input 
               type={showPassword ? "text" : "password"} 
               placeholder="••••••••" 
-              className="w-full p-3 bg-brand-dark border border-brand-border rounded-xl text-sm text-text-main focus:border-blue-500 outline-none transition-all pr-12"
+              className="w-full p-3 bg-brand-dark border border-brand-border rounded-xl text-sm text-text-main focus:border-blue-500 outline-none transition-all pr-12 placeholder:text-slate-600"
               onChange={(e) => setPassword(e.target.value)} 
               required
             />
@@ -97,19 +114,26 @@ export default function LoginPage() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-blue-600 text-white p-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 mt-4"
+            className="w-full bg-blue-600 text-white p-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 mt-4 active:scale-[0.98]"
           >
             {loading ? 'Authenticating...' : 'Authorize Access'}
           </button>
         </form>
 
         <div className="mt-8 pt-6 border-t border-brand-border text-center">
-          <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-3">New Organization?</p>
+          <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-3">
+            New Organization?
+          </p>
           <Link href="/register" className="text-blue-500 hover:text-blue-400 text-[10px] font-black uppercase underline decoration-2 underline-offset-4">
             Request Registration
           </Link>
         </div>
       </div>
+      
+      {/* Footer Info */}
+      <p className="mt-8 text-slate-600 text-[9px] font-bold uppercase tracking-[0.2em]">
+        Secure Terminal Access // 2026 Edition
+      </p>
     </div>
   )
 }
