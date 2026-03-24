@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { ThemeToggle } from "@/components/ThemeToggle"
@@ -16,66 +15,56 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    console.log("DEBUG: Login attempt started for:", identifier)
+    console.log("Attempting login for:", identifier)
 
     let targetEmail = identifier
 
-    // Step 1: Username to Email Conversion
+    // Convert username to email if no '@' is present
     if (!identifier.includes('@')) {
-      console.log("DEBUG: Identifier is username, searching profiles...")
       const { data: profile, error: pError } = await supabase
         .from('profiles')
         .select('email')
-        .ilike('username', identifier) // Matches 'Admin' or 'admin'
+        .ilike('username', identifier)
         .single()
 
       if (pError || !profile) {
-        console.error("DEBUG: Profile lookup failed:", pError?.message)
-        alert("Username not found. Ensure you have run the RLS policy in Supabase.")
+        console.error("Profile lookup error:", pError)
+        alert("Username not found. Please check your credentials.")
         setLoading(false)
         return
       }
       targetEmail = profile.email
-      console.log("DEBUG: Email found:", targetEmail)
     }
 
-    // Step 2: Authentication
     try {
-      console.log("DEBUG: Contacting Supabase Auth...")
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email: targetEmail, 
         password 
       })
 
       if (error) {
-        console.error("DEBUG: Auth error:", error.message)
         alert(error.message)
         setLoading(false)
       } else if (data?.user) {
-        console.log("DEBUG: Auth successful! User ID:", data.user.id)
-        
-        // Step 3: Reliable Redirect
-        // A small timeout ensures cookies are written before redirecting
-        setTimeout(() => {
-          console.log("DEBUG: Redirecting to Dashboard...")
-          window.location.replace('/') 
-        }, 500)
+        console.log("Login successful, redirecting...")
+        // Using href ensures the page reloads with the new auth cookies
+        window.location.href = '/'
       }
     } catch (err) {
-      console.error("DEBUG: Unexpected crash:", err)
+      console.error("Critical error:", err)
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-brand-dark flex flex-col items-center justify-center p-6 transition-colors duration-200">
+    <div className="min-h-screen bg-brand-dark flex flex-col items-center justify-center p-6">
       <div className="absolute top-6 right-6">
         <ThemeToggle />
       </div>
 
       <div className="w-full max-w-md bg-brand-panel border border-brand-border rounded-3xl p-8 shadow-2xl">
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-blue-600 p-3 rounded-2xl mb-4 shadow-lg shadow-blue-500/20">
+          <div className="bg-blue-600 p-3 rounded-2xl mb-4 shadow-lg">
             <ShieldCheck className="text-white" size={32} />
           </div>
           <h1 className="text-2xl font-black tracking-tighter text-text-main uppercase italic">
@@ -92,7 +81,7 @@ export default function LoginPage() {
             <input 
               type="text" 
               placeholder="Enter credentials" 
-              className="w-full p-3 bg-brand-dark border border-brand-border rounded-xl text-sm text-text-main focus:border-blue-500 outline-none transition-all"
+              className="w-full p-3 bg-brand-dark border border-brand-border rounded-xl text-sm text-text-main focus:border-blue-500 outline-none"
               onChange={(e) => setIdentifier(e.target.value)} 
               required 
             />
@@ -103,14 +92,14 @@ export default function LoginPage() {
             <input 
               type={showPassword ? "text" : "password"} 
               placeholder="••••••••" 
-              className="w-full p-3 bg-brand-dark border border-brand-border rounded-xl text-sm text-text-main focus:border-blue-500 outline-none transition-all pr-12"
+              className="w-full p-3 bg-brand-dark border border-brand-border rounded-xl text-sm text-text-main focus:border-blue-500 outline-none pr-12"
               onChange={(e) => setPassword(e.target.value)} 
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-[38px] text-slate-500 hover:text-blue-500 transition-colors"
+              className="absolute right-4 top-[38px] text-slate-500 hover:text-blue-500"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -119,23 +108,18 @@ export default function LoginPage() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-blue-600 text-white p-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 mt-4 active:scale-[0.98]"
+            className="w-full bg-blue-600 text-white p-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 disabled:opacity-50 mt-4"
           >
             {loading ? 'Authenticating...' : 'Authorize Access'}
           </button>
         </form>
 
         <div className="mt-8 pt-6 border-t border-brand-border text-center">
-          <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-3">New Organization?</p>
           <Link href="/register" className="text-blue-500 hover:text-blue-400 text-[10px] font-black uppercase underline decoration-2 underline-offset-4">
             Request Registration
           </Link>
         </div>
       </div>
-      
-      <p className="mt-8 text-slate-600 text-[9px] font-bold uppercase tracking-[0.2em]">
-        Secure Terminal Access // 2026 Edition
-      </p>
     </div>
   )
 }
