@@ -11,7 +11,7 @@ git push
 
 ------------------------------------------------------------------------
 git add .
-git commit -m "Updated global css 2i"
+git commit -m "Updated billing 2"
 git push origin main
 
 git add -A
@@ -20,3 +20,6 @@ git pull origin main
 git add .
 git commit -m "Merging remote changes and adding Search/Filter functionality"
 git push origin main
+
+
+gaslogistics.vercel.app
