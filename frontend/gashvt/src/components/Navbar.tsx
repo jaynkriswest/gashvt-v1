@@ -5,11 +5,10 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Home, 
-  Database, 
   Layers, 
   LogOut, 
   CreditCard, 
-  ScanLine 
+  Zap 
 } from 'lucide-react';
 import { ThemeToggle } from "@/components/ThemeToggle"
 
@@ -24,7 +23,6 @@ export default function Navbar() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
-        // Fetch role to determine which links to show
         const { data } = await supabase
           .from('profiles')
           .select('role')
@@ -49,7 +47,6 @@ export default function Navbar() {
     return () => subscription.unsubscribe();
   }, [supabase]);
 
-  // Don't show Navbar on Login or Register pages
   if (pathname === '/login' || pathname === '/register') return null;
 
   return (
@@ -62,30 +59,10 @@ export default function Navbar() {
           
           {user && (
             <div className="flex items-center gap-6">
-              {/* Main Dashboard Link */}
-              <NavLink 
-                href="/" 
-                label="Intel" 
-                icon={<Home size={14} />} 
-                active={pathname === '/'} 
-              />
-
-              {/* Financial Terminal Link (Billing) */}
-              <NavLink 
-                href="/billing" 
-                label="Financial" 
-                icon={<CreditCard size={14} />} 
-                active={pathname === '/billing'} 
-              />
-
-              {/* Bulk Processing: Restricted to Admins */}
+              <NavLink href="/" label="Intel" icon={<Home size={14} />} active={pathname === '/'} />
+              <NavLink href="/billing" label="Financial" icon={<CreditCard size={14} />} active={pathname === '/billing'} />
               {userRole === 'Admin' && (
-                <NavLink 
-                  href="/bulk" 
-                  label="Bulk" 
-                  icon={<Layers size={14} />} 
-                  active={pathname === '/bulk'} 
-                />
+                <NavLink href="/bulk" label="Bulk" icon={<Layers size={14} />} active={pathname === '/bulk'} />
               )}
             </div>
           )}
@@ -101,7 +78,6 @@ export default function Navbar() {
               <button 
                 onClick={() => supabase.auth.signOut().then(() => window.location.href='/login')}
                 className="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-500/10 rounded-lg"
-                title="Sign Out"
               >
                 <LogOut size={18} />
               </button>
@@ -118,9 +94,7 @@ function NavLink({ href, label, icon, active }: any) {
     <Link 
       href={href} 
       className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${
-        active 
-          ? 'text-blue-500' 
-          : 'text-slate-400 hover:text-white'
+        active ? 'text-blue-500' : 'text-slate-400 hover:text-white'
       }`}
     >
       {icon} {label}
