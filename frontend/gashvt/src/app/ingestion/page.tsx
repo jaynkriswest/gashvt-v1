@@ -1,92 +1,116 @@
 'use client'
 import { useState } from 'react';
 import Scanner from '@/components/Scanner';
-import { Database, Info, AlertTriangle, CheckCircle2, ScanLine } from 'lucide-react';
+import { ScanLine, Keyboard, FileUp, Database, PlusCircle } from 'lucide-react';
 
 export default function IngestionPage() {
-  const [assetInfo, setAssetInfo] = useState<any>(null);
-  const [isScanning, setIsScanning] = useState(true);
-
-  // Mock profile data - Replace this with your actual user/auth logic
-  const profile = {
-    id: 'user_123',
-    name: 'Operator Name',
-    role: 'technician'
-  };
+  const [activeTab, setActiveTab] = useState<'scan' | 'manual' | 'bulk'>('scan');
+  
+  // Reuse your profile fetching logic here as done in barcode-scan
+  const [profile, setProfile] = useState<any>({ role: 'admin' }); 
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-black uppercase tracking-tighter text-slate-900">
-          Ingestion Terminal
-        </h1>
-        <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded-full uppercase">
-          Live Scanner Active
-        </span>
+    <div className="max-w-6xl mx-auto p-6 space-y-8">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Data Ingestion Terminal</h1>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select entry method for cylinders & batches</p>
+      </header>
+
+      {/* Navigation Tabs */}
+      <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl w-fit">
+        <TabButton active={activeTab === 'scan'} onClick={() => setActiveTab('scan')} icon={<ScanLine size={14}/>} label="Scanner" />
+        <TabButton active={activeTab === 'manual'} onClick={() => setActiveTab('manual')} icon={<Keyboard size={14}/>} label="Manual Entry" />
+        <TabButton active={activeTab === 'bulk'} onClick={() => setActiveTab('bulk')} icon={<FileUp size={14}/>} label="CSV Upload" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Left: The Camera View */}
-        <div className="bg-white border-2 border-slate-200 rounded-3xl overflow-hidden shadow-sm">
-          <Scanner 
-            userProfile={profile} // Pass the required profile here
-            onResult={(data) => {
-              setAssetInfo(data);
-              setIsScanning(false);
-            }} 
-          />
-        </div>
-
-        {/* Right: The Detected Info */}
-        <div className="space-y-4">
-          {assetInfo ? (
-            <div className="bg-white border border-blue-200 rounded-3xl p-6 shadow-xl animate-in fade-in zoom-in duration-300">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-blue-600 rounded-2xl text-white">
-                  <Database size={24} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase">Asset Identified</p>
-                  <h2 className="text-xl font-black text-slate-900">{assetInfo.serial_number}</h2>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <InfoItem label="Current Status" value={assetInfo.status} highlight />
-                <InfoItem label="Last Inspection" value={new Date(assetInfo.last_test).toLocaleDateString()} />
-                <InfoItem label="Owner/Fleet" value={assetInfo.owner_name} />
-              </div>
-
-              <button 
-                onClick={() => { setAssetInfo(null); setIsScanning(true); }}
-                className="w-full mt-8 bg-slate-900 text-white p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-colors"
-              >
-                Scan Next Asset
-              </button>
-            </div>
-          ) : (
-            <div className="h-full border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center p-12 text-center">
-              <div className="animate-bounce mb-4 text-slate-300">
-                <ScanLine size={48} />
-              </div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                Position barcode within <br/> the viewfinder to retrieve data
-              </p>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-7">
+          {activeTab === 'scan' && (
+            <div className="bg-white border-2 border-slate-200 rounded-3xl overflow-hidden shadow-sm aspect-video">
+              <Scanner userProfile={profile} onResult={(data) => console.log(data)} />
             </div>
           )}
+
+          {activeTab === 'manual' && <ManualEntryForm />}
+          
+          {activeTab === 'bulk' && <BulkUploadZone />}
+        </div>
+
+        {/* Sidebar: Recent Activity / Batch Info */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <Database className="text-blue-400" size={20} />
+              <h2 className="font-black uppercase tracking-widest text-[11px]">Current Batch Stats</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <StatCard label="Total Units" value="24" />
+              <StatCard label="Avg Capacity" value="14.2kg" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function InfoItem({ label, value, highlight = false }: any) {
+// --- Sub-Components ---
+
+function ManualEntryForm() {
   return (
-    <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100">
-      <span className="text-[9px] font-black uppercase text-slate-400">{label}</span>
-      <span className={`text-xs font-bold uppercase ${highlight ? 'text-blue-600' : 'text-slate-900'}`}>
-        {value || 'N/A'}
-      </span>
+    <div className="bg-white border-2 border-slate-200 rounded-3xl p-8 space-y-6 shadow-sm">
+      <div className="grid grid-cols-2 gap-4">
+        <InputGroup label="Cylinder ID" placeholder="e.g. LGC-9901" />
+        <InputGroup label="Capacity (kg)" placeholder="14.2" type="number" />
+        <InputGroup label="Location PIN" placeholder="560001" />
+        <InputGroup label="Customer Name" placeholder="Internal Stock" />
+      </div>
+      <button className="w-full bg-blue-600 text-white p-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 transition-all flex items-center justify-center gap-2">
+        <PlusCircle size={16} /> Register Cylinder
+      </button>
+    </div>
+  );
+}
+
+function BulkUploadZone() {
+  return (
+    <div className="border-4 border-dashed border-slate-200 rounded-3xl p-12 flex flex-col items-center justify-center text-center hover:border-blue-400 transition-colors cursor-pointer bg-slate-50/50">
+      <div className="p-4 bg-white rounded-2xl shadow-sm mb-4">
+        <FileUp size={32} className="text-blue-600" />
+      </div>
+      <p className="font-black uppercase text-[10px] tracking-widest text-slate-500">
+        Drop your CSV here or <span className="text-blue-600">Browse Files</span>
+      </p>
+      <p className="text-[9px] text-slate-400 mt-2 uppercase">Supports .csv, .xlsx (Max 500 rows per batch)</p>
+    </div>
+  );
+}
+
+function TabButton({ active, onClick, icon, label }: any) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${active ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+    >
+      {icon} {label}
+    </button>
+  );
+}
+
+function InputGroup({ label, ...props }: any) {
+  return (
+    <div className="space-y-1">
+      <label className="text-[9px] font-black uppercase text-slate-400 tracking-tighter ml-1">{label}</label>
+      <input {...props} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 transition-colors" />
+    </div>
+  );
+}
+
+function StatCard({ label, value }: any) {
+  return (
+    <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
+      <p className="text-[8px] font-black uppercase text-slate-500 mb-1">{label}</p>
+      <p className="text-lg font-black">{value}</p>
     </div>
   );
 }
