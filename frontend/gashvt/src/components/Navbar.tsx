@@ -57,12 +57,19 @@ export default function Navbar() {
               <NavLink href="/" label="Fleet Intel" icon={<Home size={14} />} active={pathname === '/'} />
               <NavLink href="/billing" label="Financial" icon={<CreditCard size={14} />} active={pathname === '/billing'} />
               
-              {/* These tabs show for Admin roles */}
+              {/* Admin specific routes */}
               {isAdmin && (
                 <>
                   <NavLink href="/ingestion" label="Ingestion" icon={<ScanLine size={14} />} active={pathname === '/ingestion'} />
                   <NavLink href="/bulk" label="Bulk Processing" icon={<Layers size={14} />} active={pathname === '/bulk'} />
-                  <NavLink href="/inventory" label="Scanner" icon={<Database size={14} />} active={pathname === '/inventory'} />
+                  
+                  {/* UPDATED: Points to /barcode-scan to match your folder structure */}
+                  <NavLink 
+                    href="/barcode-scan" 
+                    label="Scanner" 
+                    icon={<Database size={14} />} 
+                    active={pathname === '/barcode-scan'} 
+                  />
                 </>
               )}
             </div>
